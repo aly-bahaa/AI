@@ -1,2 +1,5 @@
-package code;public class GenericSearchProblem {
+package code;
+
+public class GenericSearchProblem {
+
 }
