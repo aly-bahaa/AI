@@ -1,22 +1,35 @@
 package code;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Ship {
 
     private boolean isWrecked;
-    private int health;
-    private int x;
-    private int y;
+    private int BBdamage;
+
+    private Point location;
+
     private int passengers;
 
-    public Ship(int x, int y) {
-        isWrecked = false;
-        health = 20;
-        this.x = x;
-        this.y = y;
-        Random r = new Random();
-        passengers = r.nextInt(100);
+    private boolean isBBretrievable;
+
+    public Ship(Point p, int passengers,boolean isWrecked) {
+        this.isWrecked = isWrecked;
+        this.passengers = passengers;
+        if (isWrecked)  this.isBBretrievable = true;
+        this.location = p;
+    }
+
+    @Override
+    public String toString() {
+        return "Ship{" +
+                "isWrecked=" + isWrecked +
+                ", BBdamage=" + BBdamage +
+                ", location=" + location +
+                ", passengers=" + passengers +
+                ", isBBretrievable=" + isBBretrievable +
+                '}';
     }
 }

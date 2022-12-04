@@ -1,7 +1,7 @@
 package code;
 
-import java.util.GregorianCalendar;
-import java.util.Random;
+import java.awt.*;
+import java.util.*;
 
 public class CoastGuard extends GenericSearchProblem{
 
@@ -18,7 +18,7 @@ public class CoastGuard extends GenericSearchProblem{
 
         return grid;
     }
-    public static void printGrid(int[][] matrix){
+    public static void printGrid(String[][] matrix){
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[i].length; j++) {
                 System.out.print(matrix[i][j] + " ");
@@ -26,10 +26,48 @@ public class CoastGuard extends GenericSearchProblem{
             System.out.println();
         }
     }
-    public static int[][] createGrid(String gridString){
+    //public static int[][] createGrid(String gridString){
+//        String[] input = gridString.split(";");
+//        String gridSize = input[0];
+//        int C = Integer.parseInt(input[1]);
+//        String cgLoc = input[2];
+//        String stationLoc = input[3];
+//        String shipLocAndSize = input[4];
+//
+//        String[] parsedSizes = gridSize.split(",");
+//        int m = Integer.parseInt(parsedSizes[0]);
+//        int n = Integer.parseInt(parsedSizes[1]);
+//
+//        int[][] grid = new int[n][m];
+//
+//        String[] cgParsedLoc = cgLoc.split(",");
+//        int cgX = Integer.parseInt(cgParsedLoc[0]);
+//        int cgY = Integer.parseInt(cgParsedLoc[1]);
+//        grid[cgX][cgY] = C;//placed cost guard
+//
+//        String[] stationParsedLoc = stationLoc.split(",");
+//        for (int i=0;i<stationParsedLoc.length;i+=2){
+//            int stationX = Integer.parseInt(stationParsedLoc[i]);
+//            int stationY = Integer.parseInt(stationParsedLoc[i+1]);
+//            grid[stationX][stationY] = 3;// placed a station
+//        }
+//
+//        String[] shipParsedLoc = shipLocAndSize.split(",");
+//        for (int i =0;i<shipParsedLoc.length;i+=3){
+//            int shipX = Integer.parseInt(shipParsedLoc[i]);
+//            int shipY= Integer.parseInt(shipParsedLoc[i+1]);
+//            int shipCapacity = Integer.parseInt(shipParsedLoc[i+2]);
+//            grid[shipX][shipY] = shipCapacity;
+//        }
+//
+//       printGrid(grid);
+//        return grid;
+
+
+    public static String[][] createGrid2(String gridString){
         String[] input = gridString.split(";");
         String gridSize = input[0];
-        int C = Integer.parseInt(input[1]);
+        String C = input[1];
         String cgLoc = input[2];
         String stationLoc = input[3];
         String shipLocAndSize = input[4];
@@ -38,18 +76,18 @@ public class CoastGuard extends GenericSearchProblem{
         int m = Integer.parseInt(parsedSizes[0]);
         int n = Integer.parseInt(parsedSizes[1]);
 
-        int[][] grid = new int[n][m];
+        String[][] grid = new String[n][m];
 
         String[] cgParsedLoc = cgLoc.split(",");
         int cgX = Integer.parseInt(cgParsedLoc[0]);
         int cgY = Integer.parseInt(cgParsedLoc[1]);
-        grid[cgX][cgY] = C;//placed cost guard
+        grid[cgX][cgY] ="cg," + C;//placed cost guard
 
         String[] stationParsedLoc = stationLoc.split(",");
         for (int i=0;i<stationParsedLoc.length;i+=2){
             int stationX = Integer.parseInt(stationParsedLoc[i]);
             int stationY = Integer.parseInt(stationParsedLoc[i+1]);
-            grid[stationX][stationY] = 3;// placed a station
+            grid[stationX][stationY] = "st";// placed a station
         }
 
         String[] shipParsedLoc = shipLocAndSize.split(",");
@@ -57,21 +95,57 @@ public class CoastGuard extends GenericSearchProblem{
             int shipX = Integer.parseInt(shipParsedLoc[i]);
             int shipY= Integer.parseInt(shipParsedLoc[i+1]);
             int shipCapacity = Integer.parseInt(shipParsedLoc[i+2]);
-            grid[shipX][shipY] = shipCapacity;
+            grid[shipX][shipY] ="sh,"+ shipCapacity;//placed a ship
         }
 
-       printGrid(grid);
+        printGrid(grid);
         return grid;
 
-   }
-
-   /*
-
-    */
-    public String extractState(int[][] grid){
+    }
+    public static State extractState(String[][] grid){
         String state = "";
-
-        return state;
+        //1- current loc of the cg
+        int cgX = 0;
+        int cgY = 0;
+        int cgC = 0;
+        String cg = "";
+        int shC = 0;
+        String shipLocAndCap = "";
+        String st = "";
+        ArrayList<Ship> ships = new ArrayList<>();
+        ArrayList<Point> stations = new ArrayList<>();
+        for (int i=0;i<grid.length;i++){
+            for (int j=0;j< grid[0].length;j++){
+                //System.out.println(grid.length-1);
+                if (grid[i][j] != null) {
+                    if (grid[i][j].contains("cg")) {
+                        cgX = i;//loc X
+                        cgY = j;//loc Y
+                        cg = grid[i][j];
+                        String[] cgCapacity = cg.split(",");
+                        cgC = Integer.parseInt(cgCapacity[1]);//its Capacity
+                        //System.out.println(cgC);
+                    }
+                    if (grid[i][j].contains("sh")) {
+                        boolean isWrecked = false;
+                        String sh = grid[i][j];
+                        String[] shCapacity = sh.split(",");
+                        shC = Integer.parseInt(shCapacity[1]);//its Capacity
+                        if (shC == 0) isWrecked = true;
+                        Ship ship = new Ship(new Point(i,j),shC,isWrecked);
+                        ships.add(ship);
+                      //  shipLocAndCap += i + "," + j +","+ shC + ",";
+                    }
+                    if (grid[i][j].contains("st")) {
+                        st += i + "," + j +",";
+                        stations.add(new Point(i,j));
+                    }
+                }
+            }
+        }
+       // state =  cgX + "," + cgY + ";" + cgC + ";" + shipLocAndCap + ";" + st;
+        State s = new State(cgX,cgY,cgC,ships,stations);
+        return s;
     }
     /*
     1- draw grid
@@ -80,9 +154,22 @@ public class CoastGuard extends GenericSearchProblem{
      */
    public static String Solve(String gridString,String strategy, boolean visualize){
         String plan = "";
-        int[][] grid = createGrid(gridString);
-        Node n = new Node(gridString);
+        String[][] grid = createGrid2(gridString);
+        State initState = extractState(grid);
+        String[] arr = gridString.split(";");
+        int m = Integer.parseInt(arr[0].split(",")[0]);
+        int n = Integer.parseInt(arr[0].split(",")[1]);
+        Node initNode = new Node(initState,m,n);
 
+        Queue<Node> nodes = new LinkedList<>();
+        nodes.add(initNode);
+//        while (true){
+//            if (nodes.isEmpty()) return "failure";
+//            Node n = nodes.remove();}
+
+        System.out.println(initNode.toString());
+       System.out.println(initNode.getState().toString());
+       System.out.println(initNode.getPossibleActions());
         return plan;
    }
 
@@ -100,6 +187,8 @@ public class CoastGuard extends GenericSearchProblem{
         String grid9 = "7,5;100;3,4;2,6,3,5;0,0,4,0,1,8,1,4,77,1,5,1,3,2,94,4,3,46;";
         String grid10= "10,6;59;1,7;0,0,2,2,3,0,5,3;1,3,69,3,4,80,4,7,94,4,9,14,5,2,39;";
 
-        createGrid(grid3);
+       //String[][] g =  createGrid2(grid10);
+       //extractState(g);
+        Solve(grid9,"ll",true);
     }
 }
