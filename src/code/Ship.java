@@ -22,6 +22,46 @@ public class Ship {
         this.location = p;
     }
 
+    public boolean isWrecked() {
+        return isWrecked;
+    }
+
+    public void setWrecked(boolean wrecked) {
+        isWrecked = wrecked;
+    }
+
+    public int getBBdamage() {
+        return BBdamage;
+    }
+
+    public void setBBdamage(int BBdamage) {
+        this.BBdamage = BBdamage;
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    public int getPassengers() {
+        return passengers;
+    }
+
+    public void setPassengers(int passengers) {
+        this.passengers = passengers;
+    }
+
+    public boolean isBBretrievable() {
+        return isBBretrievable;
+    }
+
+    public void setBBretrievable(boolean BBretrievable) {
+        isBBretrievable = BBretrievable;
+    }
+
     @Override
     public String toString() {
         return "Ship{" +

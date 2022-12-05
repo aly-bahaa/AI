@@ -6,36 +6,28 @@ import java.util.Arrays;
 
 public class Node {
     private State state;
-    private int agentX;
-    private int agentY;
-    private int agentCapacity;
     private ArrayList<String> possibleActions;
-    private int NremainingShips;
-    private ArrayList<Ship> ships;
-    private ArrayList<Point> stationLocations;
+
+    private Node parent;
+    private int depth;
+    private String operator;
+    private String pathCost;
     private int m;
     private int n;
 
 
 
-    public Node (State state,int m, int n){
+    public Node (State state,int m, int n,Node parent, int depth,String operator ,String pathCost){
         this.state = state;
-        this.agentX = state.getCgX();
-        this.agentY = state.getCgY();
-        this.agentCapacity = state.getCgC();
-        this.ships = state.getShips();
-        this.stationLocations = state.getStations();
         this.m = m;
         this.n = n;
+        this.parent = parent;
+        this.depth = depth;
+        this.operator = operator;
+        this.pathCost = pathCost;
         this.possibleActions = checkPossibleActions();
     }
-    public int getNremainingShips() {
-        return NremainingShips;
-    }
 
-    public void setNremainingShips(int nremainingShips) {
-        NremainingShips = nremainingShips;
-    }
 
     public int getM() {
         return m;
@@ -86,30 +78,31 @@ public class Node {
 
     private ArrayList<String> checkPossibleActions(){
         ArrayList<String> pa = new ArrayList<>();
+        int  agentX = state.getCgX();
+        int agentY = state.getCgY();
         Point agentLoc = new Point(agentX,agentY);
        if (agentX!=0) pa.add("up");
        if (agentY!=0) pa.add("left");
        if (agentX!= n - 1) pa.add("down");
        if (agentY!= m -1) pa.add("right");
-       if (ships.contains(agentLoc)) pa.add("pickUp");
-       if (stationLocations.contains(agentLoc)) pa.add("drop");
-       // System.out.println("m:" + m + "n: " + this.getN() + "x: "+agentX + "y: " + agentY);
+       for (int i = 0;i<state.getShips().size();i++){
+           if (state.getShips().get(i).getLocation() == (agentLoc)) {
+               pa.add("pickUp");
+           }
+           if (state.getShips().get(i).getLocation() == (agentLoc) && state.getShips().get(i).isWrecked() ) {
+               if (state.getShips().get(i).isBBretrievable())
+               pa.add("Retrieve");
+           }
+       }
+        for (int i = 0;i<state.getStations().size();i++) {
+            if (state.getShips().get(i).getLocation() == (agentLoc)) {
+                pa.add("drop");
+            }
+        }
+    //    System.out.println("m:" + m + "n: " + this.getN() + "x: "+agentX + "y: " + agentY);
         return pa;
     }
 
-    @Override
-    public String toString() {
-        return "Node{" +
-                "state='" + state + '\'' +
-                ", agentX=" + agentX +
-                ", agentY=" + agentY +
-                ", agentCapacity=" + agentCapacity +
-                ", possibleActions=" + possibleActions +
-                ", NremainingShips=" + NremainingShips +
-                ", shipsLocations=" + ships.toString() +
-                ", stationLocations=" + stationLocations.toString() +
-                '}';
-    }
 
     public void pickUp(){
 
@@ -122,13 +115,13 @@ public class Node {
     }
     public void move(String direction){
      if(direction == "up"){
-         setAgentY(getAgentY()-1);
+         state.setCgY(state.getCgY()-1);
      } else if (direction == "down") {
-         setAgentY(getAgentY() + 1);
+         state.setCgY(state.getCgY() + 1);
      } else if (direction == "right") {
-         setAgentX(getAgentX() + 1);
+         state.setCgC(state.getCgX() + 1);
      } else if (direction == "left") {
-         setAgentX(getAgentX() - 1);
+         state.setCgX(state.getCgX() - 1);
      }
     }
 
@@ -139,36 +132,6 @@ public class Node {
 
 
 
-
-
-
-
-
-
-
-    public int getAgentX() {
-        return agentX;
-    }
-
-    public void setAgentX(int agentX) {
-        this.agentX = agentX;
-    }
-
-    public int getAgentY() {
-        return agentY;
-    }
-
-    public void setAgentY(int agnetY) {
-        this.agentY = agnetY;
-    }
-
-    public int getAgentCapacity() {
-        return agentCapacity;
-    }
-
-    public void setAgentCapacity(int agentCapacity) {
-        this.agentCapacity = agentCapacity;
-    }
 
     public ArrayList<String> getPossibleActions() {
         return possibleActions;

@@ -147,11 +147,33 @@ public class CoastGuard extends GenericSearchProblem{
         State s = new State(cgX,cgY,cgC,ships,stations);
         return s;
     }
-    /*
-    1- draw grid
-    2- extract meno init state
-    3- create a node mel init state di
-     */
+
+    public static boolean goalTest(State state){
+        boolean NoshipPassengers = true;
+        boolean NoBlackBoxes = true;
+        boolean NoCgPassengers = true;
+        boolean res = false;
+        for (int i = 0;i<state.getShips().size();i++){
+            if (state.getShips().get(i).getPassengers() != 0) NoshipPassengers = false;
+            if (state.getShips().get(i).isBBretrievable()) NoBlackBoxes = false;
+        }
+        if (state.getNpassengersOnCg() != 0) NoCgPassengers = false;
+        if(NoshipPassengers&NoCgPassengers&NoBlackBoxes) res = true;
+      return res;
+    }
+
+    public void expand(Node node,ArrayList<String> possibleActions){
+        for (int i =0;i< possibleActions.size();i++){
+            String action = possibleActions.get(i);
+            if (action == "up") node.move("up");
+            if (action == "down") node.move("down");
+            if (action == "left") node.move("left");
+            if (action == "right") node.move("right");
+            if (action == "pickUp") node.pickUp();
+            if (action == "drop") node.drop();
+            if (action == "Retrieve") node.retrieve();
+         }
+    }
    public static String Solve(String gridString,String strategy, boolean visualize){
         String plan = "";
         String[][] grid = createGrid2(gridString);
@@ -159,15 +181,17 @@ public class CoastGuard extends GenericSearchProblem{
         String[] arr = gridString.split(";");
         int m = Integer.parseInt(arr[0].split(",")[0]);
         int n = Integer.parseInt(arr[0].split(",")[1]);
-        Node initNode = new Node(initState,m,n);
+        Node initNode = new Node(initState,m,n,null,0,"","");
 
         Queue<Node> nodes = new LinkedList<>();
         nodes.add(initNode);
 //        while (true){
 //            if (nodes.isEmpty()) return "failure";
-//            Node n = nodes.remove();}
+//            Node node = nodes.remove();
+//            if (goalTest(node.getState())) return node.getState().toString();
+//        }
 
-        System.out.println(initNode.toString());
+     //   System.out.println(initNode.toString());
        System.out.println(initNode.getState().toString());
        System.out.println(initNode.getPossibleActions());
         return plan;
@@ -189,6 +213,6 @@ public class CoastGuard extends GenericSearchProblem{
 
        //String[][] g =  createGrid2(grid10);
        //extractState(g);
-        Solve(grid9,"ll",true);
+        Solve(gridTest,"ll",true);
     }
 }

@@ -9,10 +9,19 @@ public class State {
     private int cgC;
     private int NdeadPeople;
 
+    private int NpassengersOnCg;//hazawedo kol a pickup w a2alelo kol ma drop
     private ArrayList<Ship> ships;
     private ArrayList<Point> stations;
 
-    public State(int cgX, int cgY, int cgC,ArrayList<Ship> ships,ArrayList<Point> stations) {
+    public int getNpassengersOnCg() {
+        return NpassengersOnCg;
+    }
+
+    public void setNpassengersOnCg(int npassengersOnCg) {
+        NpassengersOnCg = npassengersOnCg;
+    }
+
+    public State(int cgX, int cgY, int cgC, ArrayList<Ship> ships, ArrayList<Point> stations) {
         this.cgX = cgX;
         this.cgY = cgY;
         this.cgC = cgC;
