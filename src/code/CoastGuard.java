@@ -5,7 +5,8 @@ import java.util.*;
 
 public class CoastGuard extends GenericSearchProblem{
 
-
+public static  int m;
+public static int n;
     public static String genGrid(){
 
         String grid = "";
@@ -110,8 +111,7 @@ public class CoastGuard extends GenericSearchProblem{
         int cgC = 0;
         String cg = "";
         int shC = 0;
-        String shipLocAndCap = "";
-        String st = "";
+        int totalpeople = 0;
         ArrayList<Ship> ships = new ArrayList<>();
         ArrayList<Point> stations = new ArrayList<>();
         for (int i=0;i<grid.length;i++){
@@ -130,21 +130,22 @@ public class CoastGuard extends GenericSearchProblem{
                         boolean isWrecked = false;
                         String sh = grid[i][j];
                         String[] shCapacity = sh.split(",");
-                        shC = Integer.parseInt(shCapacity[1]);//its Capacity
+                        shC = Integer.parseInt(shCapacity[1]);
+                        totalpeople += shC;
+                        ;//its Capacity
                         if (shC == 0) isWrecked = true;
-                        Ship ship = new Ship(new Point(i,j),shC,isWrecked);
+                        Ship ship = new Ship(false,0,new Point(i,j),shC,false);
                         ships.add(ship);
                       //  shipLocAndCap += i + "," + j +","+ shC + ",";
                     }
                     if (grid[i][j].contains("st")) {
-                        st += i + "," + j +",";
                         stations.add(new Point(i,j));
                     }
                 }
             }
         }
        // state =  cgX + "," + cgY + ";" + cgC + ";" + shipLocAndCap + ";" + st;
-        State s = new State(cgX,cgY,cgC,ships,stations);
+        State s = new State(cgX,cgY,cgC,ships,stations,0,0,0,totalpeople);
         return s;
     }
 
@@ -162,43 +163,114 @@ public class CoastGuard extends GenericSearchProblem{
       return res;
     }
 
-    public void expand(Node node,ArrayList<String> possibleActions){
+    public static ArrayList<Node> expand(Node node,ArrayList<String> possibleActions,int depth) {
+        ArrayList<Node> expandedNodes = new ArrayList<>();
+//        HashSet<State> set = new HashSet<>();
+        depth += 1;
         for (int i =0;i< possibleActions.size();i++){
+            State ns = node.getState();
+            ArrayList<Ship> test = new ArrayList<>();
+            for (int j =0;j<ns.getShips().size();j++){
+                Ship s = new Ship(ns.getShips().get(j).isWrecked(),ns.getShips().get(j).getBBdamage()
+                        ,ns.getShips().get(j).getLocation(),ns.getShips().get(j).getPassengers()
+                        ,ns.getShips().get(j).isBBretrievable());
+                test.add(s);
+            }
+            State newS = new State(ns.getCgX(),ns.getCgY(),ns.getCgC(), test,ns.getStations(), ns.getNpassengersOnCg(),
+                    ns.getNblackBoxesRetrieved(),ns.getNdeadPeople(),ns.getTotalPeople());
+//            set.add(newS);
             String action = possibleActions.get(i);
-            if (action == "up") node.move("up");
-            if (action == "down") node.move("down");
-            if (action == "left") node.move("left");
-            if (action == "right") node.move("right");
-            if (action == "pickUp") node.pickUp();
-            if (action == "drop") node.drop();
-            if (action == "Retrieve") node.retrieve();
+            if (action == "up") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.move("up",newS);
+                expandedNodes.add(n1);
+            }
+            if (action == "down") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.move("down",newS);
+                //n1.move("left",n1.getState());
+               // System.out.println("nDOWN:  "+n1);
+                expandedNodes.add(n1);
+            }
+            if (action == "left") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.move("left",newS);
+               // System.out.println("nLEFT:  "+n1);
+                expandedNodes.add(n1);
+            }
+            if (action == "right") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.move("right",newS);
+               // System.out.println("nRIGHT:  "+n1);
+                expandedNodes.add(n1);
+            }
+            if (action == "pickUp") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.pickUp(newS);
+
+               // System.out.println("nPICKUP:  "+n1);
+                expandedNodes.add(n1);
+            }
+            if (action == "drop") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+               if (n1.getState().getNpassengersOnCg() > 0) n1.drop(newS);
+                //System.out.println("nDROP:  "+n1);
+                expandedNodes.add(n1);
+            }
+            if (action == "retrieve") {
+                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
+                n1.retrieve(newS);
+                //System.out.println("nRETRIEVE:  "+n1);
+                expandedNodes.add(n1);
+            }
+//            if (action == "pickUp") node.pickUp();
+//            if (action == "drop") node.drop();
+//            if (action == "Retrieve") node.retrieve();
          }
+        return expandedNodes;
+    }
+    public static String getPlan(Node n){
+    String[] s = n.toString().split("#");
+    for (int i =0;i< s.length;i++){
+        System.out.println(s[i]);
+    }
+       return n.toString();
     }
    public static String Solve(String gridString,String strategy, boolean visualize){
         String plan = "";
         String[][] grid = createGrid2(gridString);
         State initState = extractState(grid);
         String[] arr = gridString.split(";");
-        int m = Integer.parseInt(arr[0].split(",")[0]);
-        int n = Integer.parseInt(arr[0].split(",")[1]);
+         m = Integer.parseInt(arr[0].split(",")[0]);
+         n = Integer.parseInt(arr[0].split(",")[1]);
         Node initNode = new Node(initState,m,n,null,0,"","");
-
+        int depth = 0;
         Queue<Node> nodes = new LinkedList<>();
         nodes.add(initNode);
-//        while (true){
-//            if (nodes.isEmpty()) return "failure";
-//            Node node = nodes.remove();
-//            if (goalTest(node.getState())) return node.getState().toString();
-//        }
-
-     //   System.out.println(initNode.toString());
-       System.out.println(initNode.getState().toString());
-       System.out.println(initNode.getPossibleActions());
-        return plan;
+        int c =0;
+        while (true){
+            if (strategy == "bfs"){
+                if (nodes.isEmpty()) return "failure";
+                Node node = nodes.remove();
+                if (goalTest(node.getState())){
+                    int nd = node.getState().getNdeadPeople() -1;
+                   // plan = getPlan(node);
+                    return node.toString();
+                }
+               // System.out.println(node.getState().getCgX() + "," + node.getState().getCgY() + "  " + node.getOperator());
+                ArrayList<Node> expandedNodes = expand(node,node.getPossibleActions(),depth);
+                for (Node n: expandedNodes) {
+                    nodes.add(n);
+                }
+                c++;
+            }
+            //                System.out.println("init: "+initNode);
+        }
    }
 
     public static void main(String[] args) {
         String gridTest = "3,4;97;1,2;0,1;3,2,65;";
+        String gridTest2 = "3,2;97;1,2;0,1;1,1,65;";
         String grid0 = "5,6;50;0,1;0,4,3,3;1,1,90;";
         String grid1 = "6,6;52;2,0;2,4,4,0,5,4;2,1,19,4,2,6,5,0,8;";
         String grid2 = "7,5;40;2,3;3,6;1,1,10,4,5,90;";
@@ -213,6 +285,6 @@ public class CoastGuard extends GenericSearchProblem{
 
        //String[][] g =  createGrid2(grid10);
        //extractState(g);
-        Solve(gridTest,"ll",true);
+        System.out.println(Solve(gridTest,"bfs",true));
     }
 }

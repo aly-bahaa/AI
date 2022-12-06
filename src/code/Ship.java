@@ -15,11 +15,13 @@ public class Ship {
 
     private boolean isBBretrievable;
 
-    public Ship(Point p, int passengers,boolean isWrecked) {
+
+    public Ship(boolean isWrecked, int BBdamage, Point location, int passengers, boolean isBBretrievable) {
         this.isWrecked = isWrecked;
+        this.BBdamage = BBdamage;
+        this.location = location;
         this.passengers = passengers;
-        if (isWrecked)  this.isBBretrievable = true;
-        this.location = p;
+        this.isBBretrievable = isBBretrievable;
     }
 
     public boolean isWrecked() {
@@ -35,6 +37,7 @@ public class Ship {
     }
 
     public void setBBdamage(int BBdamage) {
+        if (BBdamage < 0) BBdamage = 0;
         this.BBdamage = BBdamage;
     }
 
@@ -51,6 +54,7 @@ public class Ship {
     }
 
     public void setPassengers(int passengers) {
+        if (passengers < 0) passengers = 0;
         this.passengers = passengers;
     }
 

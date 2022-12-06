@@ -8,25 +8,40 @@ public class State {
     private int cgY;
     private int cgC;
     private int NdeadPeople;
-
-    private int NpassengersOnCg;//hazawedo kol a pickup w a2alelo kol ma drop
+    private int NpassengersOnCg;//hazawedo kol ma pickup w a2alelo kol ma drop
     private ArrayList<Ship> ships;
     private ArrayList<Point> stations;
+    private int NblackBoxesRetrieved;
+    private int totalPeople;
 
-    public int getNpassengersOnCg() {
-        return NpassengersOnCg;
+    public int getNblackBoxesRetrieved() {
+        return NblackBoxesRetrieved;
     }
 
-    public void setNpassengersOnCg(int npassengersOnCg) {
-        NpassengersOnCg = npassengersOnCg;
+    public void setNblackBoxesRetrieved(int nblackBoxesRetrieved) {
+        NblackBoxesRetrieved = nblackBoxesRetrieved;
     }
 
-    public State(int cgX, int cgY, int cgC, ArrayList<Ship> ships, ArrayList<Point> stations) {
+    public int getTotalPeople() {
+        return totalPeople;
+    }
+
+    public void setTotalPeople(int totalPeople) {
+        if (totalPeople < 0) totalPeople = 0;
+        this.totalPeople = totalPeople;
+    }
+
+    public State(int cgX, int cgY, int cgC, ArrayList<Ship> ships, ArrayList<Point> stations,
+                 int NpassengersOnCg, int NblackBoxesRetrieved, int NdeadPeople, int totalPeople) {
         this.cgX = cgX;
         this.cgY = cgY;
         this.cgC = cgC;
         this.ships = ships;
         this.stations = stations;
+        this.NpassengersOnCg = NpassengersOnCg;
+        this.NblackBoxesRetrieved = NblackBoxesRetrieved;
+        this.NdeadPeople = NdeadPeople;
+        this.totalPeople = totalPeople;
     }
 
     @Override
@@ -36,8 +51,11 @@ public class State {
                 ", cgY=" + cgY +
                 ", cgC=" + cgC +
                 ", NdeadPeople=" + NdeadPeople +
+                ", NpassengersOnCg=" + NpassengersOnCg +
+                ", NblackBoxesRetrieved=" + NblackBoxesRetrieved +
                 ", ships=" + ships +
                 ", stations=" + stations +
+                ", totalPPl=" + totalPeople +
                 '}';
     }
 
@@ -70,6 +88,7 @@ public class State {
     }
 
     public void setNdeadPeople(int ndeadPeople) {
+
         NdeadPeople = ndeadPeople;
     }
 
@@ -87,5 +106,12 @@ public class State {
 
     public void setStations(ArrayList<Point> stations) {
         this.stations = stations;
+    }
+    public int getNpassengersOnCg() {
+        return NpassengersOnCg;
+    }
+
+    public void setNpassengersOnCg(int npassengersOnCg) {
+        NpassengersOnCg = npassengersOnCg;
     }
 }
