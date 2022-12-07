@@ -50,12 +50,12 @@ public class State {
                 "cgX=" + cgX +
                 ", cgY=" + cgY +
                 ", cgC=" + cgC +
+                ", totalPPl=" + totalPeople +
                 ", NdeadPeople=" + NdeadPeople +
                 ", NpassengersOnCg=" + NpassengersOnCg +
                 ", NblackBoxesRetrieved=" + NblackBoxesRetrieved +
                 ", ships=" + ships +
                 ", stations=" + stations +
-                ", totalPPl=" + totalPeople +
                 '}';
     }
 

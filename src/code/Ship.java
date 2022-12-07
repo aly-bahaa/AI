@@ -14,14 +14,24 @@ public class Ship {
     private int passengers;
 
     private boolean isBBretrievable;
+    private boolean BBalreadyRetrieved;
 
 
-    public Ship(boolean isWrecked, int BBdamage, Point location, int passengers, boolean isBBretrievable) {
+    public boolean isBBalreadyRetrieved() {
+        return BBalreadyRetrieved;
+    }
+
+    public void setBBalreadyRetrieved(boolean BBalreadyRetrieved) {
+        this.BBalreadyRetrieved = BBalreadyRetrieved;
+    }
+
+    public Ship(boolean isWrecked, int BBdamage, Point location, int passengers, boolean isBBretrievable, boolean BBalreadyRetrieved) {
         this.isWrecked = isWrecked;
         this.BBdamage = BBdamage;
         this.location = location;
         this.passengers = passengers;
         this.isBBretrievable = isBBretrievable;
+        this.BBalreadyRetrieved = BBalreadyRetrieved;
     }
 
     public boolean isWrecked() {

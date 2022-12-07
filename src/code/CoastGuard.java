@@ -2,6 +2,7 @@ package code;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class CoastGuard extends GenericSearchProblem{
 
@@ -134,7 +135,7 @@ public static int n;
                         totalpeople += shC;
                         ;//its Capacity
                         if (shC == 0) isWrecked = true;
-                        Ship ship = new Ship(false,0,new Point(i,j),shC,false);
+                        Ship ship = new Ship(false,0,new Point(i,j),shC,false,false);
                         ships.add(ship);
                       //  shipLocAndCap += i + "," + j +","+ shC + ",";
                     }
@@ -159,13 +160,13 @@ public static int n;
             if (state.getShips().get(i).isBBretrievable()) NoBlackBoxes = false;
         }
         if (state.getNpassengersOnCg() != 0) NoCgPassengers = false;
-        if(NoshipPassengers&NoCgPassengers&NoBlackBoxes) res = true;
+        if(NoshipPassengers && NoCgPassengers&NoBlackBoxes) res = true;
       return res;
     }
 
     public static ArrayList<Node> expand(Node node,ArrayList<String> possibleActions,int depth) {
         ArrayList<Node> expandedNodes = new ArrayList<>();
-//        HashSet<State> set = new HashSet<>();
+        HashSet<String> set = new HashSet<>();
         depth += 1;
         for (int i =0;i< possibleActions.size();i++){
             State ns = node.getState();
@@ -173,70 +174,100 @@ public static int n;
             for (int j =0;j<ns.getShips().size();j++){
                 Ship s = new Ship(ns.getShips().get(j).isWrecked(),ns.getShips().get(j).getBBdamage()
                         ,ns.getShips().get(j).getLocation(),ns.getShips().get(j).getPassengers()
-                        ,ns.getShips().get(j).isBBretrievable());
+                        ,ns.getShips().get(j).isBBretrievable(),ns.getShips().get(j).isBBalreadyRetrieved());
                 test.add(s);
             }
             State newS = new State(ns.getCgX(),ns.getCgY(),ns.getCgC(), test,ns.getStations(), ns.getNpassengersOnCg(),
                     ns.getNblackBoxesRetrieved(),ns.getNdeadPeople(),ns.getTotalPeople());
-//            set.add(newS);
             String action = possibleActions.get(i);
+         //   if ( newS.getNpassengersOnCg() >= newS.getCgC()) possibleActions.remove("pickUp");
             if (action == "up") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                 n1.move("up",newS);
-                expandedNodes.add(n1);
+             //   if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+                if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
-            if (action == "down") {
+             if (action == "down") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                 n1.move("down",newS);
-                //n1.move("left",n1.getState());
-               // System.out.println("nDOWN:  "+n1);
-                expandedNodes.add(n1);
+              //   if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+                if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
-            if (action == "left") {
+             if (action == "left") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                 n1.move("left",newS);
-               // System.out.println("nLEFT:  "+n1);
-                expandedNodes.add(n1);
+            //     if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+                if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
-            if (action == "right") {
+             if (action == "right") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                 n1.move("right",newS);
-               // System.out.println("nRIGHT:  "+n1);
-                expandedNodes.add(n1);
+               // if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+                if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
-            if (action == "pickUp") {
-                Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
-                n1.pickUp(newS);
-
-               // System.out.println("nPICKUP:  "+n1);
-                expandedNodes.add(n1);
-            }
+             if (action == "pickUp") {
+                 Node n1 = new Node(newS, m, n, node, depth, action, "1,?");
+                     n1.pickUp(newS);
+                     if (set.add(n1.getState().toString())) expandedNodes.add(n1);
+                 }
             if (action == "drop") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                if (n1.getState().getNpassengersOnCg() > 0) n1.drop(newS);
-                //System.out.println("nDROP:  "+n1);
-                expandedNodes.add(n1);
+              // if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+               if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
             if (action == "retrieve") {
                 Node n1 = new Node(newS,m,n,node,depth,action,"1,?");
                 n1.retrieve(newS);
-                //System.out.println("nRETRIEVE:  "+n1);
-                expandedNodes.add(n1);
+               // if (n1.getState().getNpassengersOnCg() >= n1.getState().getCgC()) possibleActions.remove("pickUp");
+                if (set.add(n1.getState().toString())) expandedNodes.add(n1);
             }
-//            if (action == "pickUp") node.pickUp();
-//            if (action == "drop") node.drop();
-//            if (action == "Retrieve") node.retrieve();
          }
         return expandedNodes;
     }
-    public static String getPlan(Node n){
-    String[] s = n.toString().split("#");
-    for (int i =0;i< s.length;i++){
-        System.out.println(s[i]);
+    public static String reverseArray(String[] arr) {
+        // Converting Array to List
+        List<String> list = Arrays.asList(arr);
+        // Reversing the list using Collections.reverse() method
+        Collections.reverse(list);
+        // Converting list back to Array
+        String[] reversedArray = list.toArray(arr);
+        String s = "";
+        for (int i =0;i<reversedArray.length;i++){
+            s += reversedArray[i] + ",";
+        }
+        // Printing the reverse Array
+       return s;
     }
-       return n.toString();
+    public static String getOperators(Node n){
+    String[] s = n.toString().split("parent | operator=");
+    ArrayList<String> operators = new ArrayList<>();
+    String operator = "";
+    for (int i =1;i< s.length;i++){
+        operators.add(s[i].split("# | '")[0]);
+       // System.out.println(i+"- "+ operators.get(i));
+        operator +=  s[i].split("#")[0];
     }
-   public static String Solve(String gridString,String strategy, boolean visualize){
+    String[] sec = operator.split("''");
+    String akherhaga= "";
+    for (int j =0;j<sec.length;j++){
+      //  System.out.println(sec[j]);
+        akherhaga += sec[j] + ",";
+    }
+    String[] third = akherhaga.split("'");
+    String finallll = third[1];
+    String[] fourth = finallll.split(",");
+       String FINAL= reverseArray(fourth);
+    //System.out.println(FINAL);
+       return FINAL.substring(0,FINAL.length()-1);
+    }
+    public static int getNofNodes(String s){
+        int n = 0;
+        String[] s1 = s.split(",");
+       n = s1.length;
+       return n;
+    }
+   public static String solve(String gridString,String strategy, boolean visualize){
         String plan = "";
         String[][] grid = createGrid2(gridString);
         State initState = extractState(grid);
@@ -248,14 +279,20 @@ public static int n;
         Queue<Node> nodes = new LinkedList<>();
         nodes.add(initNode);
         int c =0;
-        while (true){
-            if (strategy == "bfs"){
+        while (!nodes.isEmpty()){
+            if (strategy == "BF"){
                 if (nodes.isEmpty()) return "failure";
                 Node node = nodes.remove();
                 if (goalTest(node.getState())){
-                    int nd = node.getState().getNdeadPeople() -1;
-                   // plan = getPlan(node);
-                    return node.toString();
+                    String[] ss = node.toString().split("parent");
+                    for (int i=0;i<ss.length;i++){
+                        System.out.println(ss[i]);
+                    }
+                    System.out.println(node);
+                    String nd = String.valueOf(node.getState().getNdeadPeople() -1);
+                    String blackBoxes = String.valueOf(node.getState().getNblackBoxesRetrieved());
+                    plan = getOperators(node) + ";" + nd + ";" + blackBoxes + ";" + getNofNodes(getOperators(node));
+                    return plan;
                 }
                // System.out.println(node.getState().getCgX() + "," + node.getState().getCgY() + "  " + node.getOperator());
                 ArrayList<Node> expandedNodes = expand(node,node.getPossibleActions(),depth);
@@ -264,8 +301,9 @@ public static int n;
                 }
                 c++;
             }
-            //                System.out.println("init: "+initNode);
+
         }
+        return plan;
    }
 
     public static void main(String[] args) {
@@ -285,6 +323,6 @@ public static int n;
 
        //String[][] g =  createGrid2(grid10);
        //extractState(g);
-        System.out.println(Solve(gridTest,"bfs",true));
+        System.out.println(solve(grid0,"BF",true));
     }
 }

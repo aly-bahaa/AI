@@ -127,50 +127,56 @@ public class Node {
         int  agentX = this.getState().getCgX();
         int agentY = state.getCgY();
         Point agentLoc = new Point(agentX,agentY);
-       if (agentX!=0) pa.add("up");
-       if (agentY!=0) pa.add("left");
-       if (agentX!= n - 1) pa.add("down");
-       if (agentY!= m -1) pa.add("right");
-       for (int i = 0;i<state.getShips().size();i++){
-          // System.out.println( agentLoc +",  "+ state.getShips().get(i).getLocation());
-           if ( state.getShips().get(i).getLocation().equals(agentLoc) ) {pa.add("pickUp");}
-           if (state.getShips().get(i).getLocation().equals(agentLoc) && state.getShips().get(i).isWrecked() ) {
-               if (state.getShips().get(i).isBBretrievable()) pa.add("retrieve");
-           }
-       }
+        if (agentX!=0) pa.add("up");
+        if (agentY!=0) pa.add("left");
+        if (agentX!= n - 1) pa.add("down");
+        if (agentY!= m -1) pa.add("right");
+        for (int i = 0;i<state.getShips().size();i++){
+            // System.out.println( agentLoc +",  "+ state.getShips().get(i).getLocation());
+            if(state.getShips().get(i).getLocation().equals(agentLoc))
+            {pa.add("pickUp");}
+            if (state.getShips().get(i).getLocation().equals(agentLoc) && state.getShips().get(i).isWrecked() ) {
+                if (state.getShips().get(i).isBBretrievable()) pa.add("retrieve");
+            }
+        }
         for (int i = 0;i<state.getStations().size();i++) {
             if (state.getStations().get(i).getLocation().equals(agentLoc)) pa.add("drop");
         }
-       // System.out.println("m:" + m + "n: " + this.getN() + "x: "+agentX + "y: " + agentY);
+        // System.out.println("m:" + m + "n: " + this.getN() + "x: "+agentX + "y: " + agentY);
         return pa;
     }
 
 
     public void pickUp(State state){
-      int currentCgC = state.getCgC();
-      Point agentLoc = new Point(state.getCgX(),state.getCgY());
+        int currentCgC = state.getCgC();
+        Point agentLoc = new Point(state.getCgX(),state.getCgY());
         if (state.getTotalPeople() > 0)   state.setNdeadPeople(state.getNdeadPeople() + 1);
         for (Ship s: state.getShips()) {
-            if (s.getPassengers() > 0)
-            s.setPassengers(s.getPassengers() - 1);
+//            if (s.getPassengers() > 0)
+                s.setPassengers(s.getPassengers() - 1);
             state.setTotalPeople(state.getTotalPeople() - 1);
             if (s.isBBretrievable()) s.setBBdamage(s.getBBdamage() + 1);
-            if (s.getLocation().equals(agentLoc) && s.getPassengers() > 0) {//el ship el ana 3aleha
-                if (currentCgC >= s.getPassengers()){
-                   // state.setCgC(state.getCgC() - s.getPassengers());
+            if (s.getLocation().equals(agentLoc) && !s.isWrecked()) {//el ship el ana 3aleha
+             //   System.out.println("huhuh");
+                if (currentCgC >= s.getPassengers() ){
+
+                    // state.setCgC(state.getCgC() - s.getPassengers());
                     state.setNpassengersOnCg(s.getPassengers());
                     s.setPassengers(0);
                     state.setTotalPeople(state.getTotalPeople() - state.getNpassengersOnCg());
                     if (s.getPassengers() == 0) s.setWrecked(true);
                     if (s.isWrecked() && s.getBBdamage() < 20)  s.setBBretrievable(true);
                     getPossibleActions().add("retrieve");
+                    //getPossibleActions().remove("pickUp");
                 }else{
-                    state.setNpassengersOnCg(s.getPassengers());
+                  //  System.out.println("huerere");
                     s.setPassengers(s.getPassengers() - currentCgC);
+                    state.setNpassengersOnCg(state.getCgC());
                     state.setTotalPeople(state.getTotalPeople() - state.getNpassengersOnCg());
                     if (s.getPassengers() == 0) s.setWrecked(true);
                     if (s.isWrecked() && s.getBBdamage() < 20)  s.setBBretrievable(true);
-                  //  state.setCgC(0);
+                   // getPossibleActions().remove("pickUp");
+                    //  state.setCgC(0);
                 }
             }
         }
@@ -179,6 +185,8 @@ public class Node {
         Point agentLoc = new Point(state.getCgX(),state.getCgY());
         if (state.getTotalPeople() > 0)   state.setNdeadPeople(state.getNdeadPeople() + 1);
         for (Ship s : state.getShips()) {
+            if (s.getPassengers() == 0) s.setWrecked(true);
+            if (s.isBBalreadyRetrieved()==false && s.isWrecked() && s.getBBdamage() < 20)  s.setBBretrievable(true);
             s.setPassengers(s.getPassengers() - 1);
             state.setTotalPeople(state.getTotalPeople() - 1);
             if (s.isBBretrievable()) s.setBBdamage(s.getBBdamage() + 1);
@@ -186,6 +194,7 @@ public class Node {
                 if (s.isBBretrievable()) {
                     state.setNblackBoxesRetrieved(state.getNblackBoxesRetrieved() + 1);
                     s.setBBretrievable(false);
+                    s.setBBalreadyRetrieved(true);
                 }
             }
         }
@@ -201,23 +210,25 @@ public class Node {
         }
     }
     public void move(String direction,State state){
-        if (state.getTotalPeople() > 0)   state.setNdeadPeople(state.getNdeadPeople() + 1);
         for (Ship s: state.getShips()) {
+            if (s.getPassengers() == 0) s.setWrecked(true);
+            if (s.isBBalreadyRetrieved()==false && s.isWrecked() && s.getBBdamage() < 20)  s.setBBretrievable(true);
+            if (state.getTotalPeople() > 0)   state.setNdeadPeople(state.getNdeadPeople() + 1);
             s.setPassengers(s.getPassengers() - 1);
             state.setTotalPeople(state.getTotalPeople() - 1);
             if (s.isBBretrievable()) s.setBBdamage(s.getBBdamage() + 1);
         }
-     if(direction == "up"){
-        state.setCgX( state.getCgX() - 1);
-     } else if (direction == "down") {
-         state.setCgX(state.getCgX() + 1);
-     } else if (direction == "right") {
-         state.setCgY( state.getCgY() + 1);
-     } else if (direction == "left") {
-         state.setCgY( state.getCgY() - 1);
-     }
+        if(direction == "up"){
+            state.setCgX( state.getCgX() - 1);
+        } else if (direction == "down") {
+            state.setCgX(state.getCgX() + 1);
+        } else if (direction == "right") {
+            state.setCgY( state.getCgY() + 1);
+        } else if (direction == "left") {
+            state.setCgY( state.getCgY() - 1);
+        }
         this.possibleActions = checkPossibleActions();
-    // return state;
+        // return state;
     }
 
 
